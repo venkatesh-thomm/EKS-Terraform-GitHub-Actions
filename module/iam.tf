@@ -1,5 +1,5 @@
 locals {
-  cluster_name = var.cluster-name
+  cluster_name = var.cluster_name
 }
 
 resource "random_integer" "random_suffix" {
@@ -78,6 +78,8 @@ resource "aws_iam_role" "eks_oidc" {
   name               = "eks-oidc"
 }
 
+
+
 # IAM POLICY FOR OIDC
 resource "aws_iam_policy" "eks-oidc-policy" {
   name = "test-policy"
@@ -105,25 +107,29 @@ resource "aws_iam_role_policy_attachment" "eks-oidc-policy-attach" {
 
 
 
-# IAM Role for EC2 (SSM)
-resource "aws_iam_role" "ec2_ssm_role" {
-  name = "ec2-ssm-role"
+# # IAM Role for EC2 (SSM)
+# resource "aws_iam_role" "ec2_ssm_role" {
+#   name = "ec2-ssm-role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [{
+#       Effect = "Allow"
+#       Principal = {
+#         Service = "ec2.amazonaws.com"
+#       }
+#       Action = "sts:AssumeRole"
+#     }]
+#   })
+# }
 
-# Attach SSM Policy to Role
-resource "aws_iam_role_policy_attachment" "ssm_attach" {
-  role       = aws_iam_role.ec2_ssm_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
+# # Attach SSM Policy to Role
+# resource "aws_iam_role_policy_attachment" "ssm_attach" {
+#   role       = aws_iam_role.ec2_ssm_role.name
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+# }
 
+# resource "aws_iam_role_policy_attachment" "eks_access" {
+#   role       = aws_iam_role.ec2_ssm_role.name
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+# }

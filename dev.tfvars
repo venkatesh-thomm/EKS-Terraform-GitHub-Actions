@@ -20,19 +20,22 @@ eks-sg                = "eks-sg"
 
 
 # EKS
-is-eks-cluster-enabled     = true
-cluster-version            = "1.34"
-cluster-name               = "eks-cluster"
-endpoint-private-access    = true
-endpoint-public-access     = false
-ondemand_instance_types    = ["m7i-flex.large"]
-spot_instance_types        = ["c7i-flex.large", "m7i-flex.large", "t3.micro"]
-desired_capacity_on_demand = "3"
-min_capacity_on_demand     = "2"
-max_capacity_on_demand     = "6"
-desired_capacity_spot      = "3"
-min_capacity_spot          = "2"
-max_capacity_spot          = "6"
+is-eks-cluster-enabled  = true
+cluster-version         = "1.34"
+cluster_name            = "eks-cluster"
+endpoint-private-access = true
+endpoint-public-access  = true # Set to true if you want to access the cluster endpoint over the public internet. If false, the cluster endpoint will only be accessible from within the VPC. 
+ondemand_instance_types = ["m7i-flex.large"]
+spot_instance_types     = ["c7i-flex.large", "m7i-flex.large", "t3.micro"]
+# On-demand (base)
+desired_capacity_on_demand = "1"
+min_capacity_on_demand     = "1"
+max_capacity_on_demand     = "2"
+
+# Spot (autoscaling test)
+desired_capacity_spot = "0"
+min_capacity_spot     = "0"
+max_capacity_spot     = "2"
 addons = [
   {
     name    = "vpc-cni",

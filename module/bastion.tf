@@ -40,11 +40,6 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-# Instance Profile (MANDATORY for EC2)
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2-ssm-profile"
-  role = aws_iam_role.ec2_ssm_role.name
-}
 
 
 # EC2 INSTANCE [ CONNECT USING SH MANAGER]
@@ -82,9 +77,9 @@ resource "aws_security_group_rule" "bastion_to_eks" {
 }
 
 
-# IAM Role for SSM
-resource "aws_iam_role" "bastion_ssm_role" {
-  name = "bastion-ssm-role"
+# IAM Role for EC2 (Bastion)
+resource "aws_iam_role" "ec2_ssm_role" {
+  name = "ec2-ssm-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -98,14 +93,13 @@ resource "aws_iam_role" "bastion_ssm_role" {
   })
 }
 
-# Attach AmazonSSMManagedInstanceCore policy
-resource "aws_iam_role_policy_attachment" "bastion_ssm_policy" {
-  role       = aws_iam_role.bastion_ssm_role.name
+# Attach SSM Policy
+resource "aws_iam_role_policy_attachment" "ssm_attach" {
+  role       = aws_iam_role.ec2_ssm_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-
-# Add EKS Describe permission to allow the bastion host to query EKS cluster details
+# Attach EKS Describe permission
 resource "aws_iam_policy" "bastion_eks_describe" {
   name = "bastion-eks-describe"
 
@@ -124,19 +118,27 @@ resource "aws_iam_policy" "bastion_eks_describe" {
 }
 
 resource "aws_iam_role_policy_attachment" "bastion_eks_attach" {
-  role       = aws_iam_role.bastion_ssm_role.name
+  role       = aws_iam_role.ec2_ssm_role.name # ✅ FIXED
   policy_arn = aws_iam_policy.bastion_eks_describe.arn
 }
 
+# Instance Profile (for EC2)
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2-ssm-profile"
+  role = aws_iam_role.ec2_ssm_role.name
+}
+
+# EKS Access Entry (IMPORTANT)
 resource "aws_eks_access_entry" "bastion_access" {
   cluster_name  = aws_eks_cluster.eks[0].name
-  principal_arn = aws_iam_role.bastion_ssm_role.arn
+  principal_arn = aws_iam_role.ec2_ssm_role.arn # ✅ FIXED
   type          = "STANDARD"
 }
 
+# Give admin access inside cluster
 resource "aws_eks_access_policy_association" "bastion_admin" {
   cluster_name  = aws_eks_cluster.eks[0].name
-  principal_arn = aws_iam_role.bastion_ssm_role.arn
+  principal_arn = aws_iam_role.ec2_ssm_role.arn # ✅ FIXED
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
 
   access_scope {

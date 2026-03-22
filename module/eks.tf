@@ -1,7 +1,7 @@
 resource "aws_eks_cluster" "eks" {
 
   count    = var.is-eks-cluster-enabled == true ? 1 : 0
-  name     = var.cluster-name
+  name     = var.cluster_name
   role_arn = aws_iam_role.eks-cluster-role[count.index].arn
   version  = var.cluster-version
 
@@ -21,17 +21,12 @@ resource "aws_eks_cluster" "eks" {
   }
 
   tags = {
-    Name = var.cluster-name
+    Name = var.cluster_name
     Env  = var.env
   }
 }
 
-# OIDC Provider
-resource "aws_iam_openid_connect_provider" "eks-oidc" {
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.eks-certificate.certificates[0].sha1_fingerprint]
-  url             = data.tls_certificate.eks-certificate.url
-}
+
 
 
 # AddOns for EKS Cluster
@@ -50,7 +45,7 @@ resource "aws_eks_addon" "eks-addons" {
 # NodeGroups
 resource "aws_eks_node_group" "ondemand-node" {
   cluster_name    = aws_eks_cluster.eks[0].name
-  node_group_name = "${var.cluster-name}-on-demand-nodes"
+  node_group_name = "${var.cluster_name}-on-demand-nodes"
 
   node_role_arn = aws_iam_role.eks-nodegroup-role[0].arn
 
@@ -72,10 +67,10 @@ resource "aws_eks_node_group" "ondemand-node" {
     max_unavailable = 1
   }
   tags = {
-    "Name"                                          = "${var.cluster-name}-ondemand-nodes"
-    "kubernetes.io/cluster/${var.cluster-name}"     = "owned"
+    "Name"                                          = "${var.cluster_name}-ondemand-nodes"
+    "kubernetes.io/cluster/${var.cluster_name}"     = "owned"
     "k8s.io/cluster-autoscaler/enabled"             = "true"
-    "k8s.io/cluster-autoscaler/${var.cluster-name}" = "owned"
+    "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
   }
   lifecycle { ignore_changes = [scaling_config[0].desired_size] }
 
@@ -84,7 +79,7 @@ resource "aws_eks_node_group" "ondemand-node" {
 
 resource "aws_eks_node_group" "spot-node" {
   cluster_name    = aws_eks_cluster.eks[0].name
-  node_group_name = "${var.cluster-name}-spot-nodes"
+  node_group_name = "${var.cluster_name}-spot-nodes"
 
   node_role_arn = aws_iam_role.eks-nodegroup-role[0].arn
 
@@ -103,12 +98,12 @@ resource "aws_eks_node_group" "spot-node" {
     max_unavailable = 1
   }
   tags = {
-    "Name"                                          = "${var.cluster-name}-ondemand-nodes"
-    "kubernetes.io/cluster/${var.cluster-name}"     = "owned"
+    "Name"                                          = "${var.cluster_name}-spot-nodes"
+    "kubernetes.io/cluster/${var.cluster_name}"     = "owned"
     "k8s.io/cluster-autoscaler/enabled"             = "true"
-    "k8s.io/cluster-autoscaler/${var.cluster-name}" = "owned"
+    "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
   }
-  
+
   disk_size = 50
   lifecycle { ignore_changes = [scaling_config[0].desired_size] }
   depends_on = [aws_eks_cluster.eks]

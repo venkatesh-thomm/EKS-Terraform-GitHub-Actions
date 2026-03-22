@@ -1,6 +1,4 @@
-locals {
-  cluster-name = var.cluster-name
-}
+
 
 resource "aws_vpc" "vpc" {
   cidr_block           = var.cidr-block

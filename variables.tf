@@ -1,6 +1,6 @@
 variable "aws-region" {}
 variable "env" {}
-variable "cluster-name" {}
+variable "cluster_name" {}
 variable "vpc-cidr-block" {}
 variable "vpc-name" {}
 variable "igw-name" {}
@@ -33,7 +33,7 @@ variable "cluster-version" {}
 variable "endpoint-private-access" {}
 variable "endpoint-public-access" {}
 variable "ondemand_instance_types" {
-  default = ["c7i-flex.large"]
+  default = ["m7i-flex.large"]
 }
 
 variable "spot_instance_types" {}
