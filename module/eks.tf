@@ -73,13 +73,9 @@ resource "aws_eks_node_group" "ondemand-node" {
   }
   tags = {
     "Name"                                          = "${var.cluster-name}-ondemand-nodes"
+    "kubernetes.io/cluster/${var.cluster-name}"     = "owned"
     "k8s.io/cluster-autoscaler/enabled"             = "true"
     "k8s.io/cluster-autoscaler/${var.cluster-name}" = "owned"
-  }
-
-  tags_all = {
-    "kubernetes.io/cluster/${var.cluster-name}" = "owned"
-    "Name"                                      = "${var.cluster-name}-ondemand-nodes"
   }
   lifecycle { ignore_changes = [scaling_config[0].desired_size] }
 
@@ -106,21 +102,13 @@ resource "aws_eks_node_group" "spot-node" {
   update_config {
     max_unavailable = 1
   }
-  #Infrastructure and Tooling Tags for Spot Node Group
   tags = {
-    "Name"                                          = "${var.cluster-name}-spot-nodes"
+    "Name"                                          = "${var.cluster-name}-ondemand-nodes"
+    "kubernetes.io/cluster/${var.cluster-name}"     = "owned"
     "k8s.io/cluster-autoscaler/enabled"             = "true"
     "k8s.io/cluster-autoscaler/${var.cluster-name}" = "owned"
   }
-  # Standard Labels within the cluster for Spot Node Group
-  tags_all = {
-    "kubernetes.io/cluster/${var.cluster-name}" = "owned"
-    "Name"                                      = "${var.cluster-name}-spot-nodes"
-  }
-  labels = {
-    type      = "spot"
-    lifecycle = "spot"
-  }
+  
   disk_size = 50
   lifecycle { ignore_changes = [scaling_config[0].desired_size] }
   depends_on = [aws_eks_cluster.eks]

@@ -3,22 +3,21 @@
 
 ![EKS- GitHub Actions- Terraform](assets/Presentation1.gif)
 
+
 ## 🌟 Overview
+
 This project covers:
 - **Infrastructure as Code (IaC)**: Use Terraform to define and manage your EKS cluster.
 - **CI/CD Automation**: Leverage GitHub Actions to automate deployments.
 # GitHub-Hosted Runner with AWS OIDC Flow
 
-
-
+---
 
 This document explains the authentication flow for **GitHub-hosted runners** accessing AWS resources via **OIDC (OpenID Connect)**.
 
----
 
-## Overview
+When using **GitHub-hosted runners**, the runners are ephemeral and **do not have AWS credentials** by default. 
 
-When using **GitHub-hosted runners**, the runners are ephemeral and **do not have AWS credentials** by default.  
 To authenticate with AWS, the runner uses an **OIDC token issued by GitHub** to assume a specific **IAM role**.
 
 ---
@@ -378,16 +377,5 @@ Instance has internet or VPC endpoints - SSM agent running
 sudo systemctl status amazon-ssm-agent
 ```
 
-------------------------------------------------------------------------
-
-## 🎯 Interview Points (DevOps / DevSecOps)
-
-You can say:
-
-> We use AWS SSM Session Manager instead of SSH bastions. This avoids
-> key management, removes inbound access, and provides full audit logs
-> through CloudTrail.
-
-------------------------------------------------------------------------
-
+---
 
