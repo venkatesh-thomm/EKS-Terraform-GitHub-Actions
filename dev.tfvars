@@ -21,18 +21,18 @@ eks-sg                = "eks-sg"
 
 # EKS
 is-eks-cluster-enabled     = true
-cluster-version            = "1.33"
+cluster-version            = "1.34"
 cluster-name               = "eks-cluster"
 endpoint-private-access    = true
 endpoint-public-access     = false
-ondemand_instance_types    = ["t3a.medium"]
-spot_instance_types        = ["c5a.large", "c5a.xlarge", "m5a.large", "m5a.xlarge", "c5.large", "m5.large", "t3a.large", "t3a.xlarge", "t3a.medium"]
-desired_capacity_on_demand = "1"
-min_capacity_on_demand     = "1"
-max_capacity_on_demand     = "5"
-desired_capacity_spot      = "1"
-min_capacity_spot          = "1"
-max_capacity_spot          = "10"
+ondemand_instance_types    = ["m7i-flex.large"]
+spot_instance_types        = ["c7i-flex.large", "m7i-flex.large", "t3.micro"]
+desired_capacity_on_demand = "3"
+min_capacity_on_demand     = "2"
+max_capacity_on_demand     = "6"
+desired_capacity_spot      = "3"
+min_capacity_spot          = "2"
+max_capacity_spot          = "6"
 addons = [
   {
     name    = "vpc-cni",

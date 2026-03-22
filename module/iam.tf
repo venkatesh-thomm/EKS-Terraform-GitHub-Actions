@@ -102,27 +102,8 @@ resource "aws_iam_role_policy_attachment" "eks-oidc-policy-attach" {
   policy_arn = aws_iam_policy.eks-oidc-policy.arn
 }
 
-# IAM Role for SSM
-resource "aws_iam_role" "bastion_ssm_role" {
-  name = "bastion-ssm-role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
 
-# Attach AmazonSSMManagedInstanceCore policy
-resource "aws_iam_role_policy_attachment" "bastion_ssm_policy" {
-  role       = aws_iam_role.bastion_ssm_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
 
 # IAM Role for EC2 (SSM)
 resource "aws_iam_role" "ec2_ssm_role" {
@@ -145,3 +126,4 @@ resource "aws_iam_role_policy_attachment" "ssm_attach" {
   role       = aws_iam_role.ec2_ssm_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
+

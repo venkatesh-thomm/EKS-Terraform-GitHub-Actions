@@ -12,9 +12,11 @@ resource "aws_eks_cluster" "eks" {
     security_group_ids      = [aws_security_group.eks-cluster-sg.id]
   }
 
+  # Enable EKS Cluster Control Plane Logging
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   access_config {
-    authentication_mode                         = "CONFIG_MAP"
+    authentication_mode                         = "API_AND_CONFIG_MAP"
     bootstrap_cluster_creator_admin_permissions = true
   }
 
@@ -60,7 +62,7 @@ resource "aws_eks_node_group" "ondemand-node" {
 
   subnet_ids = [aws_subnet.private-subnet[0].id, aws_subnet.private-subnet[1].id, aws_subnet.private-subnet[2].id]
 
-  instance_types = var.ondemand_instance_types
+  instance_types = sort(var.ondemand_instance_types)
   capacity_type  = "ON_DEMAND"
   labels = {
     type = "ondemand"
@@ -70,12 +72,16 @@ resource "aws_eks_node_group" "ondemand-node" {
     max_unavailable = 1
   }
   tags = {
-    "Name" = "${var.cluster-name}-ondemand-nodes"
+    "Name"                                          = "${var.cluster-name}-ondemand-nodes"
+    "k8s.io/cluster-autoscaler/enabled"             = "true"
+    "k8s.io/cluster-autoscaler/${var.cluster-name}" = "owned"
   }
+
   tags_all = {
     "kubernetes.io/cluster/${var.cluster-name}" = "owned"
-    "Name" = "${var.cluster-name}-ondemand-nodes"
+    "Name"                                      = "${var.cluster-name}-ondemand-nodes"
   }
+  lifecycle { ignore_changes = [scaling_config[0].desired_size] }
 
   depends_on = [aws_eks_cluster.eks]
 }
@@ -94,24 +100,28 @@ resource "aws_eks_node_group" "spot-node" {
 
   subnet_ids = [aws_subnet.private-subnet[0].id, aws_subnet.private-subnet[1].id, aws_subnet.private-subnet[2].id]
 
-  instance_types = var.spot_instance_types
+  instance_types = sort(var.ondemand_instance_types)
   capacity_type  = "SPOT"
 
   update_config {
     max_unavailable = 1
   }
+  #Infrastructure and Tooling Tags for Spot Node Group
   tags = {
-    "Name" = "${var.cluster-name}-spot-nodes"
+    "Name"                                          = "${var.cluster-name}-spot-nodes"
+    "k8s.io/cluster-autoscaler/enabled"             = "true"
+    "k8s.io/cluster-autoscaler/${var.cluster-name}" = "owned"
   }
+  # Standard Labels within the cluster for Spot Node Group
   tags_all = {
     "kubernetes.io/cluster/${var.cluster-name}" = "owned"
-    "Name" = "${var.cluster-name}-ondemand-nodes"
+    "Name"                                      = "${var.cluster-name}-spot-nodes"
   }
   labels = {
     type      = "spot"
     lifecycle = "spot"
   }
   disk_size = 50
-
+  lifecycle { ignore_changes = [scaling_config[0].desired_size] }
   depends_on = [aws_eks_cluster.eks]
 }
