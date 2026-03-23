@@ -1,19 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-test
-  app: nginx
+  name: nginx-prod
+  labels:
+    app: nginx
 spec:
   replicas: 2
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1 # Allow one pod to be unavailable during the update
-      maxSurge: 1 # Allow one additional pod to be created during the update
-
   selector:
     matchLabels:
       app: nginx
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+
   template:
     metadata:
       labels:
@@ -21,19 +22,49 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: nginx:1.20
+          image: nginx:1.21
           ports:
             - containerPort: 80
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: nginx-service
 spec:
-  type: NodePort # Change to LoadBalancer if you want to expose it externally
+  type: ClusterIP
   selector:
     app: nginx
   ports:
-    - protocol: TCP
-      port: 80
+    - port: 80
       targetPort: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-prod
+
+  minReplicas: 2
+  maxReplicas: 10
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
